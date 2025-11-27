@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Bidding</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="mb-4">Start Bidding</h2>
+    <form id="biddingForm">
+        <div class="form-group">
+            <label for="beadingCarId">Bidding Car ID:</label>
+            <input type="text" class="form-control" id="beadingCarId" name="beadingCarId" required>
+        </div>
+        <div class="form-group">
+            <label for="userId">User ID:</label>
+            <input type="text" class="form-control" id="userId" name="userId" required>
+        </div>
+        <div class="form-group">
+            <label for="basePrice">Base Price:</label>
+            <input type="text" class="form-control" id="basePrice" name="basePrice" required>
+        </div>
+        <div class="form-group">
+            <label for="startTime">Start Time:</label>
+            <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Start Bidding</button>
+    </form>
+    <div id="responseMessage" class="mt-4"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#biddingForm').submit(function(event) {
+            event.preventDefault();
+
+            var formData = {
+                beadingCarId: $('#beadingCarId').val(),
+                userId: $('#userId').val(),
+                basePrice: $('#basePrice').val(),
+                startTime: $('#startTime').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/Bidding/v1/SetTime',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    $('#responseMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+                    // Clear form fields if needed
+                    $('#biddingForm')[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.status + ': ' + xhr.statusText;
+                    $('#responseMessage').html('<div class="alert alert-danger">Error: ' + errorMessage + '</div>');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
