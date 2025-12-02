@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .results-container {
+            margin-top: 20px;
+        }
+        .results-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results-list li {
+            padding: 10px;
+            background-color: #f0f0f0;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="search-container">
+    <h2>Car Search</h2>
+    <input type="text" id="searchInput" class="search-input" placeholder="Enter car model, brand, or area...">
+    <div class="results-container">
+        <ul id="resultsList" class="results-list"></ul>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const resultsList = document.getElementById('resultsList');
+
+    searchInput.addEventListener('input', function() {
+        const query = searchInput.value.trim();
+        if (query.length > 0) {
+            fetchResults(query);
+        } else {
+            clearResults();
+        }
+    });
+
+    async function fetchResults(query) {
+        try {
+            const response = await fetch(`http://localhost:8080/cars/searchBarFilter?searchBarInput=${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const results = await response.json();
+            displayResults(results.list);
+        } catch (error) {
+            console.error('Error fetching results:', error);
+            clearResults();
+        }
+    }
+
+    function displayResults(results) {
+        resultsList.innerHTML = '';
+        results.forEach(result => {
+            const li = document.createElement('li');
+            li.textContent = `${result.brand} ${result.model} (${result.area}) - ${result.price}`;
+            resultsList.appendChild(li);
+        });
+    }
+
+    function clearResults() {
+        resultsList.innerHTML = '';
+    }
+</script>
+
+</body>
+</html>

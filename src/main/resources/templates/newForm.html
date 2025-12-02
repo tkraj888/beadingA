@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Password</title>
+</head>
+<body>
+<h2>Update Password</h2>
+
+<form id="updatePasswordForm">
+    <label for="password">New Password:</label>
+    <input type="password" id="password" name="password" required>
+
+    <label for="confirmPassword">Confirm Password:</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+    <button type="button" onclick="updatePassword()">Update Password</button>
+</form>
+
+<script>
+    // Fetch the token from the URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    // Set the token value in the form
+    document.getElementById('updatePasswordForm').innerHTML += '<input type="hidden" name="token" value="' + token + '">';
+
+    function updatePassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match. Please enter matching passwords.');
+            return;
+        }
+
+        // Perform the API call to verify the token and update the password
+        fetch('/cars/update-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: token,
+                password: password,
+                confirmPassword: confirmPassword,
+            }),
+        })
+
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            // You can redirect the user to a login page or any other page after updating the password
+            window.location.href = '/login'; // Replace '/login' with the desired URL
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update password. Please try again.');
+        });
+    }
+</script>
+</body>
+</html>
