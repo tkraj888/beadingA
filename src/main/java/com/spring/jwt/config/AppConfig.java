@@ -170,7 +170,7 @@ public class AppConfig {
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
 
-                config.setAllowedOrigins(Arrays.asList("https://caryanamindia.com","https://www.caryanamindia.com", "http://localhost:5173","https://localhost/**","https://localhost:3000","http://localhost:8081","https://caryanam.netlify.app/"));
+                config.setAllowedOrigins(Arrays.asList("https://caryanam-ashish.vercel.app","https://caryanamindia.com","https://www.caryanamindia.com", "http://localhost:5173","https://localhost/**","https://localhost:3000","http://localhost:8081","https://caryanam.netlify.app/"));
                 config.setAllowedMethods(Collections.singletonList("*"));
                 config.setAllowCredentials(true);
                 config.setAllowedHeaders(Collections.singletonList("*"));
