@@ -22,7 +22,7 @@ public class SocketIOConfig {
     @Value("${socketio.host:0.0.0.0}")
     private String host;
 
-    @Value("${socketio.port:8091}")
+    @Value("${socketio.port:8082}")
     private Integer port;
 
     private SocketIOServer server;
