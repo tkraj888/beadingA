@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,6 +50,7 @@ public class BidCarsServiceImpl implements BidCarsService {
     private final BiddingTImerRepo biddingTimerRepo;
 
     private ScheduledFuture<?> scheduledFuture;
+    private final Map<Integer, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(BidCarsServiceImpl.class);
 
@@ -101,26 +103,35 @@ public class BidCarsServiceImpl implements BidCarsService {
     }
 
     public void scheduleBidProcessing(BidCars bidCar) {
+
+        Integer carId = bidCar.getBidCarId();
+
         LocalDateTime closingTime = bidCar.getClosingTime();
         ZonedDateTime indiaTime = closingTime.atZone(ZoneId.of("Asia/Kolkata"));
-        long delay = java.time.Duration.between(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")), indiaTime).toMillis();
+        long delay = Duration.between(ZonedDateTime.now(ZoneId.of("Asia/Kolkata")), indiaTime).toMillis();
 
         if (delay > 0) {
-            if (scheduledFuture != null && !scheduledFuture.isDone()) {
-                scheduledFuture.cancel(false);
+
+            // ❗ Cancel OLD scheduled task ONLY for this car ID
+            if (scheduledTasks.containsKey(carId)) {
+                ScheduledFuture<?> oldTask = scheduledTasks.get(carId);
+                if (!oldTask.isDone()) oldTask.cancel(false);
             }
 
-            scheduledFuture = taskScheduler.schedule(() -> {
+            // ❗ Create a NEW scheduled task for THIS car only
+            ScheduledFuture<?> newTask = taskScheduler.schedule(() -> {
                 try {
-                    log.info("Processing bid for car: " + bidCar.getBidCarId());
+                    log.info("Processing bid for car: " + carId);
                     processBid(bidCar);
                 } catch (Exception e) {
-                    log.error("Failed to process bid for car: " + bidCar.getBidCarId(), e);
+                    log.error("Failed to process bid for car: " + carId, e);
                     retryProcessingBid(bidCar, 3);
                 }
             }, new Date(System.currentTimeMillis() + delay));
 
-            log.info("Scheduled task for bidCarId: " + bidCar.getBidCarId() + " with delay: " + delay + " ms");
+            scheduledTasks.put(carId, newTask);
+
+            log.info("Scheduled bid closing for car {} with delay {} ms", carId, delay);
         }
     }
 
